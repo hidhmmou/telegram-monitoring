@@ -189,7 +189,7 @@ async def send_startup_message(bot: Bot):
         bar = "🟩" * filled + "⬜" * (bar_length - filled)
 
         msg = (
-            f"PC Study Monitor Bot Started!\n"
+            f"LPC ICH3L!\n"
         )
 
         await bot.send_message(chat_id=CHAT_ID, text=msg)
