@@ -1,9 +1,18 @@
 #!/bin/bash
 set -e
 
-USER_NAME=$(logname)
+# Detect the desktop user (who is logged into the X session)
+DESKTOP_USER=$(who | grep '(:0)' | awk '{print $1}' | head -n1)
+if [ -z "$DESKTOP_USER" ]; then
+    echo "Error: No user found logged into X display :0"
+    echo "Please make sure someone is logged into the desktop session"
+    exit 1
+fi
+
+USER_NAME=$DESKTOP_USER
 HOME_DIR=$(eval echo "~$USER_NAME")
 
+echo "[+] Detected desktop user: $USER_NAME"
 echo "[+] Installing dependencies"
 sudo apt update --fix-missing || true
 sudo apt install -y python3 python3-pip scrot
@@ -12,9 +21,15 @@ pip3 install --break-system-packages python-telegram-bot==20.4 python-dotenv
 
 echo "[+] Preparing directories"
 sudo mkdir -p /opt/study-monitor
-sudo chown $USER_NAME:$USER_NAME /opt/study-monitor
+sudo chown -R $USER_NAME:$USER_NAME /opt/study-monitor
+sudo chmod 755 /opt/study-monitor
 
 sudo chmod +x /opt/study-monitor/*.py
+
+# Initialize state.json with correct ownership
+sudo touch /opt/study-monitor/state.json
+sudo chown $USER_NAME:$USER_NAME /opt/study-monitor/state.json
+sudo chmod 664 /opt/study-monitor/state.json
 
 echo "[+] Creating systemd services"
 

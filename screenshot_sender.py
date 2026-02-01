@@ -14,6 +14,7 @@ CHAT_ID = os.getenv("CHAT_ID")
 DAILY_LIMIT = int(os.getenv("DAILY_LIMIT", 60))
 INTERVAL = 5
 STATE_FILE = "/opt/study-monitor/state.json"
+os.environ['DISPLAY'] = ':0'
 
 def load_state():
     if not os.path.exists(STATE_FILE):
