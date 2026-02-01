@@ -155,7 +155,6 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Take and send a screenshot immediately"""
     try:
-        await update.message.reply_text("📸 Taking screenshot...")
         filename = "/tmp/instant_screenshot.png"
         
         # Take screenshot using scrot
@@ -164,7 +163,7 @@ async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Send screenshot
         with open(filename, "rb") as photo:
-            await update.message.reply_photo(photo=photo, caption="📸 Instant screenshot")
+            await update.message.reply_photo(photo=photo, caption="📸 HATID MAYSKAR")
         
         # Clean up
         if os.path.exists(filename):
