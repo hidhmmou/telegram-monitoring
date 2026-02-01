@@ -2,6 +2,7 @@
 import os
 import json
 import asyncio
+import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update, Bot
@@ -151,6 +152,29 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(msg)
 
+async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Take and send a screenshot immediately"""
+    try:
+        await update.message.reply_text("📸 Taking screenshot...")
+        filename = "/tmp/instant_screenshot.png"
+        
+        # Take screenshot using scrot
+        os.environ['DISPLAY'] = ':0'
+        subprocess.run(["scrot", filename], check=True)
+        
+        # Send screenshot
+        with open(filename, "rb") as photo:
+            await update.message.reply_photo(photo=photo, caption="📸 Instant screenshot")
+        
+        # Clean up
+        if os.path.exists(filename):
+            os.remove(filename)
+            
+    except subprocess.CalledProcessError as e:
+        await update.message.reply_text(f"❌ Failed to take screenshot: {e}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
+
 # ---------- Startup Message ----------
 async def send_startup_message(bot: Bot):
     # Compose a startup status message similar to /status output
@@ -186,6 +210,7 @@ async def main():
     app.add_handler(CommandHandler("pause", pause))
     app.add_handler(CommandHandler("resume", resume))
     app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("screenshot", screenshot))
 
     bot = Bot(token=BOT_TOKEN)
     await app.initialize()
