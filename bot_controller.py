@@ -163,7 +163,7 @@ async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Send screenshot
         with open(filename, "rb") as photo:
-            await update.message.reply_photo(photo=photo, caption="📸 HATID MAYSKAR")
+            await update.message.reply_photo(photo=photo, caption="📸 HA MAYSKAR")
         
         # Clean up
         if os.path.exists(filename):
@@ -204,7 +204,7 @@ async def main():
     app.add_handler(CommandHandler("pause", pause))
     app.add_handler(CommandHandler("resume", resume))
     app.add_handler(CommandHandler("status", status))
-    app.add_handler(CommandHandler("screenshot", screenshot))
+    app.add_handler(CommandHandler("mayskar", screenshot))
 
     bot = Bot(token=BOT_TOKEN)
     await app.initialize()
