@@ -39,6 +39,7 @@ Description=Study Monitor Screenshot
 After=graphical.target
 
 [Service]
+RuntimeMaxSec=60
 Type=oneshot
 User=$USER_NAME
 Environment=DISPLAY=:0
