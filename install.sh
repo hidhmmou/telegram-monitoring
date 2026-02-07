@@ -39,7 +39,6 @@ Description=Study Monitor Screenshot
 After=graphical.target
 
 [Service]
-RuntimeMaxSec=60
 Type=oneshot
 User=$USER_NAME
 Environment=DISPLAY=:0
@@ -53,6 +52,7 @@ Description=Screenshot every 5 minutes
 
 [Timer]
 OnBootSec=2min
+OnActiveSec=5min
 OnUnitActiveSec=5min
 Persistent=true
 
