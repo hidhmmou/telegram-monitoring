@@ -36,6 +36,23 @@ def reset_daily_limit_if_needed(state):
         save_state(state)
 
 async def send_screenshot():
+    bot = Bot(token=BOT_TOKEN)
+    filename = "/tmp/screenshot.png"
+
+    # Take screenshot
+    subprocess.run(["scrot", filename], check=True)
+
+    # Send screenshot
+    try:
+        with open(filename, "rb") as photo:
+            await bot.send_photo(chat_id=CHAT_ID, photo=photo)
+    except Exception as e:
+        print("Failed to send screenshot:", e)
+    finally:
+        if os.path.exists(filename):
+            os.remove(filename)
+
+async def send_screenshot_stateful():
     state = load_state()
     reset_daily_limit_if_needed(state)
 

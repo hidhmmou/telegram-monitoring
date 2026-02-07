@@ -44,6 +44,8 @@ User=$USER_NAME
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=$HOME_DIR/.Xauthority
 ExecStart=/usr/bin/python3 /opt/study-monitor/screenshot_sender.py
+StandardOutput=journal
+StandardError=journal
 EOF
 
 sudo tee /etc/systemd/system/study-monitor-screenshot.timer > /dev/null <<EOF
@@ -69,6 +71,8 @@ After=network.target
 User=$USER_NAME
 ExecStart=/usr/bin/python3 /opt/study-monitor/bot_controller.py
 Restart=always
+StandardOutput=journal
+StandardError=journal
 EOF
 
 sudo systemctl daemon-reload
