@@ -43,40 +43,63 @@ def setup_x11_environment():
     if 'XAUTHORITY' not in os.environ:
         # Try to find the user running X
         try:
-            # Get the user who owns the X0 lock file
+            import pwd
+            
+            # Method 1: Check X0 lock file owner
             x_lock = '/tmp/.X0-lock'
             if os.path.exists(x_lock):
-                import pwd
                 stat_info = os.stat(x_lock)
                 x_user = pwd.getpwuid(stat_info.st_uid).pw_name
                 xauthority_path = f'/home/{x_user}/.Xauthority'
                 if os.path.exists(xauthority_path):
                     os.environ['XAUTHORITY'] = xauthority_path
+                    print(f"Using XAUTHORITY from X0 lock owner: {xauthority_path}")
             
-            # Alternative: try common locations
+            # Method 2: Check for users with active X sessions
             if 'XAUTHORITY' not in os.environ:
-                for user_home in [os.path.expanduser('~'), '/home/patrick', '/root']:
+                result = subprocess.run(['who'], capture_output=True, text=True)
+                for line in result.stdout.strip().split('\n'):
+                    if '(:0)' in line or '(:0.0)' in line:
+                        username = line.split()[0]
+                        xauth = f'/home/{username}/.Xauthority'
+                        if os.path.exists(xauth):
+                            os.environ['XAUTHORITY'] = xauth
+                            print(f"Using XAUTHORITY from who output: {xauth}")
+                            break
+            
+            # Method 3: Try common user locations
+            if 'XAUTHORITY' not in os.environ:
+                for user_home in ['/home/patrick', '/home/ayman', os.path.expanduser('~'), '/root']:
                     xauth = os.path.join(user_home, '.Xauthority')
                     if os.path.exists(xauth):
                         os.environ['XAUTHORITY'] = xauth
+                        print(f"Using XAUTHORITY from common location: {xauth}")
                         break
+                        
+            if 'XAUTHORITY' not in os.environ:
+                print("Warning: Could not find XAUTHORITY file")
         except Exception as e:
             print(f"Warning: Could not set XAUTHORITY: {e}")
 
 async def send_screenshot():
+    print(f"BOT_TOKEN loaded: {'Yes' if BOT_TOKEN else 'No'}")
+    print(f"CHAT_ID: {CHAT_ID}")
+    
     bot = Bot(token=BOT_TOKEN)
     filename = "/tmp/screenshot.png"
 
     # Take screenshot
     setup_x11_environment()
     subprocess.run(["scrot", filename], check=True)
+    print(f"Screenshot saved to {filename}")
 
     # Send screenshot
     try:
         with open(filename, "rb") as photo:
-            await bot.send_photo(chat_id=CHAT_ID, photo=photo)
+            result = await bot.send_photo(chat_id=CHAT_ID, photo=photo)
+            print(f"Screenshot sent! Message ID: {result.message_id}")
     except Exception as e:
-        print("Failed to send screenshot:", e)
+        print(f"Failed to send screenshot: {e}")
     finally:
         if os.path.exists(filename):
             os.remove(filename)

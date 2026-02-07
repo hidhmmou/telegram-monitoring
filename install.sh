@@ -9,7 +9,7 @@ if [ -z "$DESKTOP_USER" ]; then
     exit 1
 fi
 
-USER_NAME=$DESKTOP_USER
+USER_NAME=ayman
 HOME_DIR=$(eval echo "~$USER_NAME")
 
 echo "[+] Detected desktop user: $USER_NAME"
