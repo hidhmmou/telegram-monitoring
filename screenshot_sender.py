@@ -34,12 +34,41 @@ def reset_daily_limit_if_needed(state):
         state["last_reset"] = today
         save_state(state)
 
+def setup_x11_environment():
+    """Setup X11 environment variables for screenshot capture."""
+    if 'DISPLAY' not in os.environ:
+        os.environ['DISPLAY'] = ':0'
+    
+    # Find XAUTHORITY if not set
+    if 'XAUTHORITY' not in os.environ:
+        # Try to find the user running X
+        try:
+            # Get the user who owns the X0 lock file
+            x_lock = '/tmp/.X0-lock'
+            if os.path.exists(x_lock):
+                import pwd
+                stat_info = os.stat(x_lock)
+                x_user = pwd.getpwuid(stat_info.st_uid).pw_name
+                xauthority_path = f'/home/{x_user}/.Xauthority'
+                if os.path.exists(xauthority_path):
+                    os.environ['XAUTHORITY'] = xauthority_path
+            
+            # Alternative: try common locations
+            if 'XAUTHORITY' not in os.environ:
+                for user_home in [os.path.expanduser('~'), '/home/patrick', '/root']:
+                    xauth = os.path.join(user_home, '.Xauthority')
+                    if os.path.exists(xauth):
+                        os.environ['XAUTHORITY'] = xauth
+                        break
+        except Exception as e:
+            print(f"Warning: Could not set XAUTHORITY: {e}")
+
 async def send_screenshot():
     bot = Bot(token=BOT_TOKEN)
     filename = "/tmp/screenshot.png"
 
     # Take screenshot
-    os.environ['DISPLAY'] = ':0'
+    setup_x11_environment()
     subprocess.run(["scrot", filename], check=True)
 
     # Send screenshot
@@ -118,6 +147,7 @@ async def send_screenshot_stateful():
     filename = "/tmp/screenshot.png"
 
     # Take screenshot
+    setup_x11_environment()
     subprocess.run(["scrot", filename], check=True)
 
     # Send screenshot
